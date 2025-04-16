@@ -6,6 +6,8 @@ import {
   Body,
   UseGuards,
   Request,
+  Patch,
+  Delete,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -33,5 +35,19 @@ export class PostsController {
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.postService.findOne(id);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Patch(':id')
+  async updatePost(@Param('id') id: number, @Body() body, @Request() req) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+    return this.postService.update(id, body, req.user.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Delete(':id')
+  async deletePost(@Param('id') id: number, @Request() req) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+    return this.postService.delete(id, req.user.userId);
   }
 }

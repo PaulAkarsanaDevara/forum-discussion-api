@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from 'src/shared/entity/post.entity';
 import { Repository } from 'typeorm';
@@ -22,5 +22,35 @@ export class PostsService {
 
   findOne(id: number) {
     return this.repo.findOne({ where: { id }, relations: ['comments'] });
+  }
+
+  async update(id: number, data: Partial<Post>, userId: number) {
+    const post = await this.repo.findOne({
+      where: { id },
+      relations: ['user'],
+    });
+    if (!post || post.user.id !== userId) {
+      throw new UnauthorizedException(
+        'Anda hanya dapat mengedit postingan Anda sendiri!',
+      );
+    }
+
+    Object.assign(post, data);
+    return this.repo.save(post);
+  }
+
+  async delete(id: number, userId: number) {
+    const post = await this.repo.findOne({
+      where: { id },
+      relations: ['user'],
+    });
+
+    if (!post || post.user.id !== userId) {
+      throw new UnauthorizedException(
+        'Anda hanya dapat menghapus postingan Anda sendiri.',
+      );
+    }
+
+    return this.repo.remove(post);
   }
 }

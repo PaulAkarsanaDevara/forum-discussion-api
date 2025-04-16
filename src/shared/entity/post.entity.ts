@@ -20,7 +20,7 @@ export class Post {
   content: string;
 
   @ManyToOne(() => User)
-  author: User;
+  user: User;
 
   @OneToMany(() => Comment, (comment) => comment.post)
   comments: Comment[];
